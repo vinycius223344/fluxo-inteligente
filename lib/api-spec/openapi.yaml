@@ -1,0 +1,518 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Fluxo Inteligente - Sistema de Controle do Refeitório Escolar
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: classes
+    description: Turmas escolares
+  - name: students
+    description: Alunos
+  - name: mealSlots
+    description: Horários de almoço
+  - name: checkins
+    description: Entradas no refeitório
+  - name: dashboard
+    description: Estatísticas do painel
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /classes:
+    get:
+      operationId: listClasses
+      tags: [classes]
+      summary: Listar turmas
+      responses:
+        "200":
+          description: Lista de turmas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Class"
+    post:
+      operationId: createClass
+      tags: [classes]
+      summary: Criar turma
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClassInput"
+      responses:
+        "201":
+          description: Turma criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Class"
+
+  /classes/{id}:
+    delete:
+      operationId: deleteClass
+      tags: [classes]
+      summary: Excluir turma
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Turma excluída
+
+  /students:
+    get:
+      operationId: listStudents
+      tags: [students]
+      summary: Listar alunos
+      parameters:
+        - name: classId
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de alunos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+    post:
+      operationId: createStudent
+      tags: [students]
+      summary: Cadastrar aluno
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentInput"
+      responses:
+        "201":
+          description: Aluno cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+
+  /students/{id}:
+    get:
+      operationId: getStudent
+      tags: [students]
+      summary: Buscar aluno por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Aluno encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+        "404":
+          description: Aluno não encontrado
+    patch:
+      operationId: updateStudent
+      tags: [students]
+      summary: Atualizar aluno
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentUpdate"
+      responses:
+        "200":
+          description: Aluno atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+    delete:
+      operationId: deleteStudent
+      tags: [students]
+      summary: Excluir aluno
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Aluno excluído
+
+  /meal-slots:
+    get:
+      operationId: listMealSlots
+      tags: [mealSlots]
+      summary: Listar horários de almoço
+      responses:
+        "200":
+          description: Lista de horários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MealSlot"
+    post:
+      operationId: createMealSlot
+      tags: [mealSlots]
+      summary: Criar horário de almoço
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MealSlotInput"
+      responses:
+        "201":
+          description: Horário criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MealSlot"
+
+  /meal-slots/{id}:
+    patch:
+      operationId: updateMealSlot
+      tags: [mealSlots]
+      summary: Atualizar horário
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MealSlotUpdate"
+      responses:
+        "200":
+          description: Horário atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MealSlot"
+    delete:
+      operationId: deleteMealSlot
+      tags: [mealSlots]
+      summary: Excluir horário
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Horário excluído
+
+  /checkins:
+    get:
+      operationId: listCheckins
+      tags: [checkins]
+      summary: Listar entradas
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+        - name: studentId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lista de entradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Checkin"
+
+  /checkins/scan:
+    post:
+      operationId: scanQrCode
+      tags: [checkins]
+      summary: Escanear QR Code do aluno (totem)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScanInput"
+      responses:
+        "200":
+          description: Resultado do escaneamento
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanResult"
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Estatísticas do painel
+      responses:
+        "200":
+          description: Estatísticas gerais
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/today-schedule:
+    get:
+      operationId: getTodaySchedule
+      tags: [dashboard]
+      summary: Horários de hoje com status de ocupação
+      responses:
+        "200":
+          description: Horários do dia com contagem de entradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SlotWithCount"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Class:
+      type: object
+      required: [id, name, year]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        year:
+          type: string
+        studentCount:
+          type: ["integer", "null"]
+
+    ClassInput:
+      type: object
+      required: [name, year]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        year:
+          type: string
+          minLength: 1
+
+    Student:
+      type: object
+      required: [id, name, registration, classId, className]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        registration:
+          type: string
+        classId:
+          type: integer
+        className:
+          type: string
+        qrCode:
+          type: ["string", "null"]
+
+    StudentInput:
+      type: object
+      required: [name, registration, classId]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        registration:
+          type: string
+          minLength: 1
+        classId:
+          type: integer
+
+    StudentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        registration:
+          type: string
+          minLength: 1
+        classId:
+          type: integer
+
+    MealSlot:
+      type: object
+      required: [id, classId, className, startTime, endTime, weekDays]
+      properties:
+        id:
+          type: integer
+        classId:
+          type: integer
+        className:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: string
+        weekDays:
+          type: string
+
+    MealSlotInput:
+      type: object
+      required: [classId, startTime, endTime, weekDays]
+      properties:
+        classId:
+          type: integer
+        startTime:
+          type: string
+        endTime:
+          type: string
+        weekDays:
+          type: string
+
+    MealSlotUpdate:
+      type: object
+      properties:
+        classId:
+          type: integer
+        startTime:
+          type: string
+        endTime:
+          type: string
+        weekDays:
+          type: string
+
+    Checkin:
+      type: object
+      required: [id, studentId, studentName, className, checkedInAt, status]
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        studentName:
+          type: string
+        className:
+          type: string
+        mealSlotId:
+          type: ["integer", "null"]
+        checkedInAt:
+          type: string
+        status:
+          type: string
+          enum: [allowed, denied, no_slot]
+
+    ScanInput:
+      type: object
+      required: [studentId]
+      properties:
+        studentId:
+          type: integer
+
+    ScanResult:
+      type: object
+      required: [status, message, studentName, className]
+      properties:
+        status:
+          type: string
+          enum: [allowed, denied, no_slot]
+        message:
+          type: string
+        studentName:
+          type: string
+        className:
+          type: string
+        checkinId:
+          type: ["integer", "null"]
+
+    DashboardStats:
+      type: object
+      required: [totalStudents, totalCheckinsTodayCount, totalClasses, checkinsThisWeek, mostActiveClass]
+      properties:
+        totalStudents:
+          type: integer
+        totalCheckinsTodayCount:
+          type: integer
+        totalClasses:
+          type: integer
+        checkinsThisWeek:
+          type: integer
+        mostActiveClass:
+          type: ["string", "null"]
+
+    SlotWithCount:
+      type: object
+      required: [id, classId, className, startTime, endTime, weekDays, checkinCount]
+      properties:
+        id:
+          type: integer
+        classId:
+          type: integer
+        className:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: string
+        weekDays:
+          type: string
+        checkinCount:
+          type: integer
